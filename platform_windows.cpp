@@ -91,6 +91,13 @@ public:
 			RegisterFastcallCallingConvention(cc);
 			RegisterStdcallCallingConvention(cc);
 		}
+
+		/* "windows-syscall" is defined and registered in arch-arm64 */
+		cc = arch->GetCallingConventionByName("windows-syscall");
+		if (cc)
+		{
+			SetSystemCallConvention(cc);
+		}
 	}
 };
 
