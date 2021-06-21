@@ -4,10 +4,10 @@ using namespace BinaryNinja;
 using namespace std;
 
 
-class WindowsX86Platform: public Platform
+class WindowsX86Platform : public Platform
 {
-public:
-	WindowsX86Platform(Architecture* arch): Platform(arch, "windows-x86")
+ public:
+	WindowsX86Platform(Architecture* arch) : Platform(arch, "windows-x86")
 	{
 		Ref<CallingConvention> cc;
 
@@ -38,10 +38,10 @@ public:
 };
 
 
-class WindowsX64Platform: public Platform
+class WindowsX64Platform : public Platform
 {
-public:
-	WindowsX64Platform(Architecture* arch): Platform(arch, "windows-x86_64")
+ public:
+	WindowsX64Platform(Architecture* arch) : Platform(arch, "windows-x86_64")
 	{
 		Ref<CallingConvention> cc;
 
@@ -57,10 +57,10 @@ public:
 };
 
 
-class WindowsArmv7Platform: public Platform
+class WindowsArmv7Platform : public Platform
 {
-public:
-	WindowsArmv7Platform(Architecture* arch, const std::string& name): Platform(arch, name)
+ public:
+	WindowsArmv7Platform(Architecture* arch, const std::string& name) : Platform(arch, name)
 	{
 		Ref<CallingConvention> cc;
 
@@ -76,10 +76,10 @@ public:
 };
 
 
-class WindowsArm64Platform: public Platform
+class WindowsArm64Platform : public Platform
 {
-public:
-	WindowsArm64Platform(Architecture* arch): Platform(arch, "windows-aarch64")
+ public:
+	WindowsArm64Platform(Architecture* arch) : Platform(arch, "windows-aarch64")
 	{
 		Ref<CallingConvention> cc;
 
