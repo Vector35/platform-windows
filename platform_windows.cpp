@@ -129,6 +129,7 @@ extern "C"
 			platform = new WindowsX86Platform(x86);
 			Platform::Register("windows", platform);
 			BinaryViewType::RegisterDefaultPlatform("PE", x86, platform);
+			BinaryViewType::RegisterDefaultPlatform("COFF", x86, platform);
 		}
 
 		Ref<Architecture> x64 = Architecture::GetByName("x86_64");
@@ -139,6 +140,7 @@ extern "C"
 			platform = new WindowsX64Platform(x64);
 			Platform::Register("windows", platform);
 			BinaryViewType::RegisterDefaultPlatform("PE", x64, platform);
+			BinaryViewType::RegisterDefaultPlatform("COFF", x64, platform);
 		}
 
 		Ref<Architecture> armv7 = Architecture::GetByName("armv7");
@@ -154,6 +156,8 @@ extern "C"
 			Platform::Register("windows", armPlatform);
 			Platform::Register("windows", thumbPlatform);
 			BinaryViewType::RegisterDefaultPlatform("PE", armv7, armPlatform);
+			BinaryViewType::RegisterDefaultPlatform("COFF", armv7, armPlatform);
+			BinaryViewType::RegisterDefaultPlatform("COFF", thumb2, thumbPlatform);
 		}
 
 		Ref<Architecture> arm64 = Architecture::GetByName("aarch64");
@@ -164,6 +168,7 @@ extern "C"
 			platform = new WindowsArm64Platform(arm64);
 			Platform::Register("windows", platform);
 			BinaryViewType::RegisterDefaultPlatform("PE", arm64, platform);
+			BinaryViewType::RegisterDefaultPlatform("COFF", arm64, platform);
 		}
 
 		return true;
