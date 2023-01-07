@@ -144,12 +144,6 @@ public:
 			switch (instr.operation)
 			{
 			case LLIL_PUSH:
-				if (!pushesToStack)
-				{
-					// First push, should be constant (exception handler function)
-					if (!instr.GetSourceExpr<LLIL_PUSH>().GetValue().IsConstant())
-						return false;
-				}
 				pushesToStack = true;
 
 				// If pushing again after pushing the return address, this is not a match.
@@ -327,6 +321,8 @@ public:
 		bool restoresStackPointer = false;
 		bool popsFromStack = false;
 		bool lastPushBeforeReturn = false;
+		bool stackCookieXor = false;
+		bool stackCookieVerifyCall = false;
 		for (size_t i = 0; i < il->GetInstructionCount(); i++)
 		{
 			LowLevelILInstruction instr = il->GetInstruction(i);
@@ -370,6 +366,15 @@ public:
 						return false;
 					restoresStackPointer = true;
 				}
+				else if (instr.GetSourceExpr<LLIL_SET_REG>().operation == LLIL_XOR)
+				{
+					// Look for stack cookie transformations. There should only be one of these, and it
+					// should be before any of the other actions.
+					if (stackCookieXor || writesToExceptionFramePointer || restoresStackPointer || popsFromStack
+						|| lastPushBeforeReturn)
+						return false;
+					stackCookieXor = true;
+				}
 				break;
 			case LLIL_STORE:
 				if (instr.GetDestExpr<LLIL_STORE>().operation == LLIL_REG
@@ -387,17 +392,34 @@ public:
 				}
 				break;
 			case LLIL_JUMP:
-			case LLIL_GOTO:
 			case LLIL_IF:
 			case LLIL_JUMP_TO:
 			case LLIL_NORET:
 				// Epilog functions are a single basic block, so this isn't one.
 				return false;
+			case LLIL_GOTO:
+				// If there is a goto instruction, it must be to the next instruction (this will happen
+				// when inlining other parts of the epilog).
+				if (instr.GetTarget() != (instr.instructionIndex + 1))
+					return false;
+				break;
 			case LLIL_CALL:
+				// Epilog functions are either leaf functions or contain a single call to a stack cookie
+				// verification function. Check for the stack cookie verification, which will be a call
+				// to a static location just after the cookie transformation, and before any other actions.
+				// There should be only one of these.
+				if (instr.GetDestExpr<LLIL_CALL>().operation != LLIL_CONST
+					&& instr.GetDestExpr<LLIL_CALL>().operation != LLIL_CONST_PTR)
+					return false;
+				if (!stackCookieXor || stackCookieVerifyCall || writesToExceptionFramePointer || restoresStackPointer
+					|| popsFromStack || lastPushBeforeReturn)
+					return false;
+				stackCookieVerifyCall = true;
+				break;
 			case LLIL_CALL_STACK_ADJUST:
 			case LLIL_TAILCALL:
 			case LLIL_SYSCALL:
-				// Epilog functions are leaf functions.
+				// Epilog functions should not contain tailcalls, syscalls, or calls that adjust the stack.
 				return false;
 			case LLIL_UNDEF:
 			case LLIL_UNIMPL:
